@@ -9,6 +9,12 @@ import png
 COMPRESSION_TYPE_COLOR = {-1:'unknown', 0:'raw', 1:'png', 2:'jpeg'}
 COMPRESSION_TYPE_DEPTH = {-1:'unknown', 0:'raw_ushort', 1:'zlib_ushort', 2:'occi_ushort'}
 
+
+def format_frame_number_with_leading_zeros(frame: int) -> str:
+  """
+  Formats the given number as a 5-digit with leading zeros
+  """
+  return "{:05d}".format(frame)
 class RGBDFrame():
 
   def load(self, file_handle):
@@ -41,7 +47,6 @@ class RGBDFrame():
 
   def decompress_color_jpeg(self):
     return imageio.imread(self.color_data)
-
 
 class SensorData:
 
@@ -84,11 +89,11 @@ class SensorData:
       depth = np.fromstring(depth_data, dtype=np.uint16).reshape(self.depth_height, self.depth_width)
       if image_size is not None:
         depth = cv2.resize(depth, (image_size[1], image_size[0]), interpolation=cv2.INTER_NEAREST)
-      #imageio.imwrite(os.path.join(output_path, str(f) + '.png'), depth)
-      with open(os.path.join(output_path, str(f) + '.png'), 'wb') as f: # write 16-bit
+      formatted_frame_no = format_frame_number_with_leading_zeros(f)
+      with open(os.path.join(output_path, formatted_frame_no + '.png'), 'wb') as fh: # write 16-bit
         writer = png.Writer(width=depth.shape[1], height=depth.shape[0], bitdepth=16)
         depth = depth.reshape(-1, depth.shape[1]).tolist()
-        writer.write(f, depth)
+        writer.write(fh, depth)
 
   def export_color_images(self, output_path, image_size=None, frame_skip=1):
     if not os.path.exists(output_path):
@@ -98,7 +103,8 @@ class SensorData:
       color = self.frames[f].decompress_color(self.color_compression_type)
       if image_size is not None:
         color = cv2.resize(color, (image_size[1], image_size[0]), interpolation=cv2.INTER_NEAREST)
-      imageio.imwrite(os.path.join(output_path, str(f) + '.jpg'), color)
+      formatted_frame_no = format_frame_number_with_leading_zeros(f)
+      imageio.imwrite(os.path.join(output_path, formatted_frame_no + '.jpg'), color)
 
 
   def save_mat_to_file(self, matrix, filename):
@@ -112,7 +118,8 @@ class SensorData:
       os.makedirs(output_path)
     print('exporting', len(self.frames)//frame_skip, 'camera poses to', output_path)
     for f in range(0, len(self.frames), frame_skip):
-      self.save_mat_to_file(self.frames[f].camera_to_world, os.path.join(output_path, str(f) + '.txt'))
+      formatted_frame_no = format_frame_number_with_leading_zeros(f)
+      self.save_mat_to_file(self.frames[f].camera_to_world, os.path.join(output_path, formatted_frame_no + '.txt'))
 
 
   def export_intrinsics(self, output_path):
