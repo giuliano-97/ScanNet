@@ -1,6 +1,6 @@
 #!/bin/bash	
 
-ALLOWED_DATA_DIRS=("panoptic" "depth" "color" "pose")
+ALLOWED_DATA_DIRS=("panoptic" "depth" "color" "pose" "intrinsic")
 SCAN_DIR=
 DATA_DIRS=
 RECURSIVE=false
