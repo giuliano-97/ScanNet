@@ -18,8 +18,9 @@ function validate_data_dirs() {
 }
 
 function compress_scan_data() {
+  echo "Compressing ${DATA_DIRS[*]} in $1"
   cd $1
-  for DIR in $DATA_DIRS
+  for DIR in ${DATA_DIRS[*]}
   do
     if [ ! -d $DIR ]
     then

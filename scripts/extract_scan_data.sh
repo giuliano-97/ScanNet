@@ -45,7 +45,7 @@ function extract_scan_data() {
 
 	# Construct export script options
 	OPTIONS=""
-	for DIR in $DATA_DIRS
+	for DIR in ${DATA_DIRS[*]}
 	do
 		ARCHIVE=$(pwd)/${DIR}.tar.gz
 		if check_if_exists_and_not_empty $ARCHIVE
