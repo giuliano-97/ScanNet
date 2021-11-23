@@ -9,14 +9,15 @@ from instance import Instance
 from PIL import Image
 import numpy as np
 
+
 def instances2dict(imageFileList, class_labels, class_ids, verbose=False):
-    imgCount     = 0
+    imgCount = 0
     instanceDict = {}
     label2id = {}
     id2label = {}
     for i in range(len(class_labels)):
-         label2id[class_labels[i]] = class_ids[i]
-         id2label[class_ids[i]] = class_labels[i]
+        label2id[class_labels[i]] = class_ids[i]
+        id2label[class_ids[i]] = class_labels[i]
 
     if not isinstance(imageFileList, list):
         imageFileList = [imageFileList]
@@ -47,7 +48,7 @@ def instances2dict(imageFileList, class_labels, class_ids, verbose=False):
         imgCount += 1
 
         if verbose:
-            print("\rImages Processed: {}".format(imgCount), end=' ')
+            print("\rImages Processed: {}".format(imgCount), end=" ")
             sys.stdout.flush()
 
     if verbose:
@@ -55,13 +56,15 @@ def instances2dict(imageFileList, class_labels, class_ids, verbose=False):
 
     return instanceDict
 
+
 def main(argv):
     fileList = []
-    if (len(argv) > 2):
+    if len(argv) > 2:
         for arg in argv:
-            if ("png" in arg):
+            if "png" in arg:
                 fileList.append(arg)
     instances2dict(fileList, True)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
