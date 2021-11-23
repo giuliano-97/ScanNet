@@ -4,6 +4,7 @@ import zlib
 import imageio
 import cv2
 import png
+import csv
 
 COMPRESSION_TYPE_COLOR = {-1: "unknown", 0: "raw", 1: "png", 2: "jpeg"}
 COMPRESSION_TYPE_DEPTH = {
@@ -60,6 +61,26 @@ class RGBDFrame:
         return imageio.imread(self.color_data)
 
 
+class IMUFrame:
+    def load(self, file_handle):
+        self.rotation_rate = np.asarray(
+            struct.unpack("d" * 3, file_handle.read(3 * 8)), dtype=np.float64
+        )
+        self.acceleration = np.asarray(
+            struct.unpack("d" * 3, file_handle.read(3 * 8)), dtype=np.float64
+        )
+        self.magnetic_field = np.asarray(
+            struct.unpack("d" * 3, file_handle.read(3 * 8)), dtype=np.float64
+        )
+        self.attitude = np.asarray(
+            struct.unpack("d" * 3, file_handle.read(3 * 8)), dtype=np.float64
+        )
+        self.gravity = np.asarray(
+            struct.unpack("d" * 3, file_handle.read(3 * 8)), dtype=np.float64
+        )
+        self.timestamp = struct.unpack("Q", file_handle.read(8))[0]
+
+
 class SensorData:
     def __init__(self, filename):
         self.version = 4
@@ -100,6 +121,13 @@ class SensorData:
                 frame = RGBDFrame()
                 frame.load(f)
                 self.frames.append(frame)
+
+            num_imu_frames = struct.unpack("Q", f.read(8))[0]
+            self.imu_frames = []
+            for i in range(num_imu_frames):
+                imu_frame = IMUFrame()
+                imu_frame.load(f)
+                self.imu_frames.append(imu_frame)
 
     def export_depth_images(self, output_path, image_size=None, frame_skip=1):
         if not os.path.exists(output_path):
@@ -181,3 +209,13 @@ class SensorData:
         self.save_mat_to_file(
             self.extrinsic_depth, os.path.join(output_path, "extrinsic_depth.txt")
         )
+
+    def export_imu_timestamps(self, output_file_path):
+        field_names = ["FrameID", "TimeStamp"]
+        with open(output_file_path, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=field_names)
+            writer.writeheader()
+            for i in range(len(self.imu_frames)):
+                writer.writerow(
+                    {"FrameID": i, "TimeStamp": self.imu_frames[i].timestamp}
+                )
