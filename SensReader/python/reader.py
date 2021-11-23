@@ -6,17 +6,40 @@ from SensorData import SensorData
 # params
 parser = argparse.ArgumentParser()
 # data paths
-parser.add_argument("--filename", required=True, help="path to sens file to read")
-parser.add_argument("--output_path", required=True, help="path to output folder")
 parser.add_argument(
-    "--export_depth_images", dest="export_depth_images", action="store_true"
+    "--filename",
+    required=True,
+    help="path to sens file to read",
 )
 parser.add_argument(
-    "--export_color_images", dest="export_color_images", action="store_true"
+    "--output_path",
+    required=True,
+    help="path to output folder",
 )
-parser.add_argument("--export_poses", dest="export_poses", action="store_true")
 parser.add_argument(
-    "--export_intrinsics", dest="export_intrinsics", action="store_true"
+    "--export_depth_images",
+    dest="export_depth_images",
+    action="store_true",
+)
+parser.add_argument(
+    "--export_color_images",
+    dest="export_color_images",
+    action="store_true",
+)
+parser.add_argument(
+    "--export_poses",
+    dest="export_poses",
+    action="store_true",
+)
+parser.add_argument(
+    "--export_intrinsics",
+    dest="export_intrinsics",
+    action="store_true",
+)
+parser.add_argument(
+    "--export_timestamps",
+    dest="export_timestamps",
+    action="store_true",
 )
 parser.set_defaults(
     export_depth_images=False,
@@ -44,6 +67,13 @@ def main():
         sd.export_poses(os.path.join(opt.output_path, "pose"))
     if opt.export_intrinsics:
         sd.export_intrinsics(os.path.join(opt.output_path, "intrinsic"))
+    if opt.export_timestamps:
+        sd.export_color_timestamps(
+            os.path.join(opt.output_path, "color_timestamps.csv")
+        )
+        sd.export_depth_timestamps(
+            os.path.join(opt.output_path, "depth_timestamps.csv")
+        )
 
 
 if __name__ == "__main__":

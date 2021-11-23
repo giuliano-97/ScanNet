@@ -4,6 +4,7 @@ import zlib
 import imageio
 import cv2
 import png
+import csv
 
 COMPRESSION_TYPE_COLOR = {-1: "unknown", 0: "raw", 1: "png", 2: "jpeg"}
 COMPRESSION_TYPE_DEPTH = {
@@ -181,3 +182,25 @@ class SensorData:
         self.save_mat_to_file(
             self.extrinsic_depth, os.path.join(output_path, "extrinsic_depth.txt")
         )
+
+    def export_color_timestamps(self, output_file_path):
+        print("Exporting color timestamps.")
+        fields = ["ImageID","TimeStamp"]
+        with open(output_file_path, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+
+            for id in range(len(self.frames)):
+                timestamp_color = self.frames[id].timestamp_color
+                writer.writerow({"ImageID": id, "TimeStamp": timestamp_color})
+
+    def export_depth_timestamps(self, output_file_path):
+        print("Exporting depth timestamps.")
+        fields = ["ImageID","TimeStamp"]
+        with open(output_file_path, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+
+            for id in range(len(self.frames)):
+                timestamp_depth = self.frames[id].timestamp_depth
+                writer.writerow({"ImageID": id, "TimeStamp": timestamp_depth})
