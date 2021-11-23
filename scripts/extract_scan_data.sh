@@ -38,7 +38,7 @@ function extract_scan_data() {
 	if [ ! -f $SENS_FILE ]
 	then
 		echo "Warning: .sens not found in $1. Skipped."
-		return 1
+		return
 	fi
 
 	EXTRACTED_DATA_DIRS=""
@@ -69,9 +69,10 @@ function extract_scan_data() {
 		EXTRACTED_DATA_DIRS="${EXTRACTED_DATA_DIRS} ${DIR}" 
 	done
 
-	if [ -z $OPTIONS ]
+	if [ -z "$OPTIONS" ]
 	then
-		return 1
+    echo "Nothing to extract in $1"
+		return
 	fi
 
 	# Extract the data
@@ -83,19 +84,23 @@ function extract_scan_data() {
 	# Compress everything now
 	for DIR in $EXTRACTED_DATA_DIRS
 	do
+    if [ ! -d ${DIR} ]
+    then
+      continue
+    fi
 		tar --remove-files --use-compress-program=pigz -cf ${DIR}.tar.gz ${DIR}
 	done
 }
 
 # Parse CLI options
-while getopts ":hrs:d:" opt
+while getopts ":hrp:d:" opt
 do
 	case ${opt} in
 		h ) 
 			echo "Extract scan data from .sens file."
 			exit 0
 			;;
-		s )
+		p )
 			if [ ! -d $OPTARG ]
 			then
 				echo "${OPTARG} is not a valid dir path!"
@@ -127,9 +132,8 @@ fi
 
 if $RECURSIVE
 then
-	SCAN_DIRS=`find $SCAN_DIR -name scene\* -type d`
 	. `which env_parallel.bash`
-	env_parallel extract_scan_data ::: $SCAN_DIRS
+	env_parallel extract_scan_data ::: `find $SCAN_DIR -name scene\* -type d`
 else
 	extract_scan_data $SCAN_DIR
 fi

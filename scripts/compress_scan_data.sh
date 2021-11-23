@@ -64,9 +64,8 @@ done
 
 if $RECURSIVE
 then
-  SCAN_DIRS=`find $SCAN_DIR -name scene\* -type d`
   . `which env_parallel.bash`
-  PARALLEL_SHELL=bash env_parallel compress_scan_data ::: $SCAN_DIRS
+  env_parallel compress_scan_data ::: `find $SCAN_DIR -name scene\* -type d`
 else
   compress_scan_data $SCAN_DIR
 fi
