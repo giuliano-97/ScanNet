@@ -41,11 +41,19 @@ parser.add_argument(
     dest="export_timestamps",
     action="store_true",
 )
+parser.add_argument(
+    "--image_size",
+    dest="image_size",
+    type=int,
+    nargs=2,
+)
 parser.set_defaults(
     export_depth_images=False,
     export_color_images=False,
     export_poses=False,
     export_intrinsics=False,
+    export_timestamps=False,
+    image_size=None,
 )
 
 opt = parser.parse_args()
@@ -62,7 +70,10 @@ def main():
     if opt.export_depth_images:
         sd.export_depth_images(os.path.join(opt.output_path, "depth"))
     if opt.export_color_images:
-        sd.export_color_images(os.path.join(opt.output_path, "color"))
+        sd.export_color_images(
+            os.path.join(opt.output_path, "color"),
+            image_size=opt.image_size,
+        )
     if opt.export_poses:
         sd.export_poses(os.path.join(opt.output_path, "pose"))
     if opt.export_intrinsics:
