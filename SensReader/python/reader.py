@@ -32,7 +32,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--export_intrinsic",
-    dest="export_intrinsics",
+    dest="export_intrinsic",
     action="store_true",
 )
 parser.add_argument(
