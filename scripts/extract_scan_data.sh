@@ -7,9 +7,9 @@ PYTHONPATH=${PYTHONPATH}:${SCANNET_DIR}/SensReader/python
 EXPORT_SCRIPT=${SCANNET_DIR}/SensReader/python/reader.py
 
 DATA_DIRS_OPTIONS=("depth" "color" "pose" "intrinsic")
+SCANS_LIST_FILE=
 DATA_DIRS=
-SCAN_DIR=
-RECURSIVE=false
+DOWNLOAD_DIR=
 
 function validate_data_dirs() {
 	# Validate data dirs list
@@ -54,16 +54,16 @@ function extract_scan_data() {
 		fi
 		case ${DIR} in
 			color)
-				OPTIONS="${OPTIONS} --export_color_images"
+				OPTIONS="${OPTIONS} --export_color"
 				;;
 			depth)
-				OPTIONS="${OPTIONS} --export_depth_images"
+				OPTIONS="${OPTIONS} --export_depth"
 				;;
 			pose)
-				OPTIONS="${OPTIONS} --export_poses"
+				OPTIONS="${OPTIONS} --export_pose"
 				;;
 			intrinsic)
-				OPTIONS="${OPTIONS} --export_intrinsics"
+				OPTIONS="${OPTIONS} --export_intrinsic"
 				;;
 		esac
 		EXTRACTED_DATA_DIRS="${EXTRACTED_DATA_DIRS} ${DIR}" 
@@ -79,6 +79,7 @@ function extract_scan_data() {
 	PYTHONPATH=$PYTHONPATH python3 $EXPORT_SCRIPT \
 		--filename $SENS_FILE \
 		--output_path $1 \
+		--image_size 640 480 \
 		$OPTIONS
 
 	# Compress everything now
@@ -93,11 +94,12 @@ function extract_scan_data() {
 }
 
 # Parse CLI options
-while getopts ":hrp:d:" opt
+while getopts ":hp:d:f:" opt
 do
 	case ${opt} in
 		h ) 
-			echo "Extract scan data from .sens file."
+			echo "Extract scan data from .sens file.\n"
+			echo "Usage extract_scan_data.sh -p <SCANS_DOWNLOAD_DIR> -d {depth,color,pose.intrinsic} -f <SCANS_LIST_FILE>"
 			exit 0
 			;;
 		p )
@@ -106,16 +108,16 @@ do
 				echo "${OPTARG} is not a valid dir path!"
 				exit 1
 			fi
-			SCAN_DIR=$OPTARG
+			DOWNLOAD_DIR=$OPTARG
 			;;
 		d ) 
 			# Parse and validate the list of directories to compress
 			IFS=',' read -ra DATA_DIRS <<< "${OPTARG}"
 			validate_data_dirs
 			;;
-		r )
-			RECURSIVE=true
-			;; 
+		f )
+			SCANS_LIST_FILE=$OPTARG
+			;;
 		\? )
 			echo "Invalid Option: -$OPTARG" 1>&2
 			exit 1
@@ -124,16 +126,19 @@ do
 done
 shift $((OPTIND -1))
 
-if [ -z $SCAN_DIR ]
+if [ -z $DOWNLOAD_DIR ]
 then
-	echo "-s must be specified!"
+	echo "The scans download dir must be specified with -p <DOWNLOAD_DIR>!"
 	exit 1
 fi
 
-if $RECURSIVE
+
+. `which env_parallel.bash`
+if [ -z $SCANS_LIST_FILE ]
 then
-	. `which env_parallel.bash`
-	env_parallel extract_scan_data ::: `find $SCAN_DIR -name scene\* -type d`
+	# Extract all the scans in the download directory
+	env_parallel extract_scan_data ::: `find $DOWNLOAD_DIR -name scene\* -type d`
 else
-	extract_scan_data $SCAN_DIR
+	# Read the directory to extract from a file
+	env_parallel extract_scan_data ::: $(cat $SCANS_LIST_FILE | sed 's|^|'"${DOWNLOAD_DIR%%/}"'/|g')
 fi
