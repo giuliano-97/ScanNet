@@ -13,7 +13,6 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output_path",
-    default=None,
     help="path to output folder",
 )
 parser.add_argument(
@@ -46,8 +45,10 @@ parser.add_argument(
     dest="image_size",
     type=int,
     nargs=2,
+    help="Size of the exported color images.",
 )
 parser.set_defaults(
+    output_path=None,
     export_depth_images=False,
     export_color_images=False,
     export_poses=False,
@@ -79,7 +80,7 @@ def main():
     if opt.export_poses:
         sd.export_poses(os.path.join(opt.output_path, "pose"))
     if opt.export_intrinsics:
-        sd.export_intrinsics(os.path.join(opt.output_path, "intrinsic"))
+        sd.export_intrinsics(os.path.join(opt.output_path, "intrinsic"), opt.image_size)
     if opt.export_timestamps:
         sd.export_imu_timestamps(os.path.join(opt.output_path, "timestamps.csv"))
 
