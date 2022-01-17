@@ -31,11 +31,8 @@ import os, sys, argparse
 import inspect
 from copy import deepcopy
 
-try:
-    import numpy as np
-except:
-    print "Failed to import numpy package."
-    sys.exit(-1)
+import numpy as np
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -245,11 +242,11 @@ def compute_averages(aps):
 def assign_instances_for_scan(pred_file, gt_file, pred_path):
     try:
         pred_info = util_3d.read_instance_prediction_file(pred_file, pred_path)
-    except Exception, e:
+    except Exception as e:
         util.print_error('unable to load ' + pred_file + ': ' + str(e))
     try:
         gt_ids = util_3d.load_ids(gt_file)
-    except Exception, e:
+    except Exception as e:
         util.print_error('unable to load ' + gt_file + ': ' + str(e))
 
     # get gt instances
@@ -314,15 +311,15 @@ def print_results(avgs):
     col1    = ":"
     lineLen = 64
 
-    print ""
-    print "#"*lineLen
+    print("")
+    print("#"*lineLen)
     line  = ""
     line += "{:<15}".format("what"      ) + sep + col1
     line += "{:>15}".format("AP"        ) + sep
     line += "{:>15}".format("AP_50%"    ) + sep
     line += "{:>15}".format("AP_25%"    ) + sep
-    print line
-    print "#"*lineLen
+    print(line)
+    print("#"*lineLen)
 
     for (li,label_name) in enumerate(CLASS_LABELS):
         ap_avg  = avgs["classes"][label_name]["ap"]
@@ -332,19 +329,19 @@ def print_results(avgs):
         line += sep + "{:>15.3f}".format(ap_avg ) + sep
         line += sep + "{:>15.3f}".format(ap_50o ) + sep
         line += sep + "{:>15.3f}".format(ap_25o ) + sep
-        print line
+        print(line)
 
     all_ap_avg  = avgs["all_ap"]
     all_ap_50o  = avgs["all_ap_50%"]
     all_ap_25o  = avgs["all_ap_25%"]
 
-    print "-"*lineLen
+    print("-"*lineLen)
     line  = "{:<15}".format("average") + sep + col1 
     line += "{:>15.3f}".format(all_ap_avg)  + sep 
     line += "{:>15.3f}".format(all_ap_50o)  + sep
     line += "{:>15.3f}".format(all_ap_25o)  + sep
-    print line
-    print ""
+    print(line)
+    print("")
 
 
 def write_result_file(avgs, filename):
@@ -361,7 +358,7 @@ def write_result_file(avgs, filename):
 
 
 def evaluate(pred_files, gt_files, pred_path, output_file):
-    print 'evaluating', len(pred_files), 'scans...'
+    print('evaluating', len(pred_files), 'scans...')
     matches = {}
     for i in range(len(pred_files)):
         matches_key = os.path.abspath(gt_files[i])
@@ -372,7 +369,7 @@ def evaluate(pred_files, gt_files, pred_path, output_file):
         matches[matches_key]['pred'] = pred2gt
         sys.stdout.write("\rscans processed: {}".format(i+1))
         sys.stdout.flush()
-    print ''
+    print('')
     ap_scores = evaluate_matches(matches)
     avgs = compute_averages(ap_scores)
 

@@ -13,7 +13,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output_path",
-    required=True,
+    default=None,
     help="path to output folder",
 )
 parser.add_argument(
@@ -61,8 +61,10 @@ print(opt)
 
 
 def main():
-    if not os.path.exists(opt.output_path):
-        os.makedirs(opt.output_path)
+    # If not specified use the same directory as the .sens file
+    if opt.output_path is None:
+        opt.output_path = os.path.dirname(opt.filename)
+    os.makedirs(opt.output_path, exist_ok=True)
     # load the data
     sys.stdout.write("loading %s..." % opt.filename)
     sd = SensorData(opt.filename)
