@@ -168,7 +168,7 @@ class SensorData:
             if image_size is not None:
                 color = cv2.resize(
                     color,
-                    image_size,
+                    (image_size[0], image_size[1]),
                     interpolation=cv2.INTER_AREA,
                 )
             formatted_frame_no = format_frame_number_with_leading_zeros(f)
