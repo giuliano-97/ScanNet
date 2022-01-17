@@ -13,26 +13,25 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output_path",
-    required=True,
     help="path to output folder",
 )
 parser.add_argument(
-    "--export_depth_images",
-    dest="export_depth_images",
+    "--export_depth",
+    dest="export_depth",
     action="store_true",
 )
 parser.add_argument(
-    "--export_color_images",
-    dest="export_color_images",
+    "--export_color",
+    dest="export_color",
     action="store_true",
 )
 parser.add_argument(
-    "--export_poses",
-    dest="export_poses",
+    "--export_pose",
+    dest="export_pose",
     action="store_true",
 )
 parser.add_argument(
-    "--export_intrinsics",
+    "--export_intrinsic",
     dest="export_intrinsics",
     action="store_true",
 )
@@ -41,11 +40,21 @@ parser.add_argument(
     dest="export_timestamps",
     action="store_true",
 )
+parser.add_argument(
+    "--image_size",
+    dest="image_size",
+    type=int,
+    nargs=2,
+    help="Size of the exported color images.",
+)
 parser.set_defaults(
-    export_depth_images=False,
-    export_color_images=False,
-    export_poses=False,
-    export_intrinsics=False,
+    output_path=None,
+    export_depth=False,
+    export_color=False,
+    export_pose=False,
+    export_intrinsic=False,
+    export_timestamps=False,
+    image_size=None,
 )
 
 opt = parser.parse_args()
@@ -53,20 +62,25 @@ print(opt)
 
 
 def main():
-    if not os.path.exists(opt.output_path):
-        os.makedirs(opt.output_path)
+    # If not specified use the same directory as the .sens file
+    if opt.output_path is None:
+        opt.output_path = os.path.dirname(opt.filename)
+    os.makedirs(opt.output_path, exist_ok=True)
     # load the data
     sys.stdout.write("loading %s..." % opt.filename)
     sd = SensorData(opt.filename)
     sys.stdout.write("loaded!\n")
-    if opt.export_depth_images:
+    if opt.export_color:
+        sd.export_color_images(
+            os.path.join(opt.output_path, "color"),
+            image_size=opt.image_size,
+        )
+    if opt.export_depth:
         sd.export_depth_images(os.path.join(opt.output_path, "depth"))
-    if opt.export_color_images:
-        sd.export_color_images(os.path.join(opt.output_path, "color"))
-    if opt.export_poses:
+    if opt.export_pose:
         sd.export_poses(os.path.join(opt.output_path, "pose"))
-    if opt.export_intrinsics:
-        sd.export_intrinsics(os.path.join(opt.output_path, "intrinsic"))
+    if opt.export_intrinsic:
+        sd.export_intrinsics(os.path.join(opt.output_path, "intrinsic"), opt.image_size)
     if opt.export_timestamps:
         sd.export_imu_timestamps(os.path.join(opt.output_path, "timestamps.csv"))
 

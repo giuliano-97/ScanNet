@@ -1,3 +1,4 @@
+from email.mime import image
 import os, struct
 import numpy as np
 import zlib
@@ -167,8 +168,8 @@ class SensorData:
             if image_size is not None:
                 color = cv2.resize(
                     color,
-                    (image_size[1], image_size[0]),
-                    interpolation=cv2.INTER_NEAREST,
+                    image_size,
+                    interpolation=cv2.INTER_AREA,
                 )
             formatted_frame_no = format_frame_number_with_leading_zeros(f)
             imageio.imwrite(
@@ -193,13 +194,30 @@ class SensorData:
                 os.path.join(output_path, formatted_frame_no + ".txt"),
             )
 
-    def export_intrinsics(self, output_path):
+    def export_intrinsics(self, output_path, image_size=None):
+        """Export camera intrinsics as .txt file
+
+        If image_size is passed, adjust the camera intrinsics to match the new image size
+        """
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         print("exporting camera intrinsics to", output_path)
-        self.save_mat_to_file(
-            self.intrinsic_color, os.path.join(output_path, "intrinsic_color.txt")
-        )
+        if image_size is not None:
+            # Adjust intrinsics matrix
+            rx = image_size[0] / self.color_width
+            ry = image_size[1] / self.color_height
+            S = np.diag([rx, ry, 1, 1])
+            self.save_mat_to_file(
+                S * self.intrinsic_color,
+                os.path.join(
+                    output_path,
+                    "intrinsic_color.txt",
+                ),
+            )
+        else:
+            self.save_mat_to_file(
+                self.intrinsic_color, os.path.join(output_path, "intrinsic_color.txt")
+            )
         self.save_mat_to_file(
             self.extrinsic_color, os.path.join(output_path, "extrinsic_color.txt")
         )

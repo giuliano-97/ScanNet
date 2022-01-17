@@ -12,17 +12,9 @@ import os, sys, argparse
 import inspect
 import json
 
-try:
-    import numpy as np
-except:
-    print "Failed to import numpy package."
-    sys.exit(-1)
-try:
-    from plyfile import PlyData, PlyElement
-except:
-    print "Please install the module 'plyfile' for PLY i/o, e.g."
-    print "pip install plyfile"
-    sys.exit(-1)
+import numpy as np
+from plyfile import PlyData, PlyElement
+
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)

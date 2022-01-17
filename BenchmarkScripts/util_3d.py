@@ -1,18 +1,8 @@
-import os, sys
+import os
 import json
 
-try:
-    import numpy as np
-except:
-    print "Failed to import numpy package."
-    sys.exit(-1)
-
-try:
-    from plyfile import PlyData, PlyElement
-except:
-    print "Please install the module 'plyfile' for PLY i/o, e.g."
-    print "pip install plyfile"
-    sys.exit(-1)
+import numpy as np
+from plyfile import PlyData, PlyElement
 
 import util
 
