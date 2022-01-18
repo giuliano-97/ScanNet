@@ -208,7 +208,7 @@ class SensorData:
             ry = image_size[1] / self.color_height
             S = np.diag([rx, ry, 1, 1])
             self.save_mat_to_file(
-                S * self.intrinsic_color,
+                S.dot(self.intrinsic_color),
                 os.path.join(
                     output_path,
                     "intrinsic_color.txt",
